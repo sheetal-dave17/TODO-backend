@@ -91,21 +91,26 @@ exports.deleteTodoItem = async (req, res) => {
 // get all todos
 exports.getAllTodo = async (req, res) => {
     try {
-       let todos = await Todo.find({});
+        let page = Math.max(0, req.param('page'));
+        let perPage = 10;
+        let total = await Todo.count();
+         let todos = await Todo.find({}).sort({ createdDate: 1 })
+           .skip(perPage * page)
+           .limit(perPage);
         if (!todos) {
             return res.status(204).json(
                 {
                     status: 'error',
                     message: `There are no todos found`
                 });
-
         }
-        return res.status(200).json(todos);
+        return res.status(200).json({todos, total});
     } catch (error) {
         return res.status(500).json(
             {
                 status: 'error',
                 error: error,
-                message: 'something went wrong' });
+                message: 'something went wrong'
+            });
     }
 };
